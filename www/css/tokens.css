@@ -3,6 +3,7 @@
    Every colour is sampled from the official logo. Phone = app shell; ≥960px = website layout. */
 
 :root {
+  --app-safe-top: env(safe-area-inset-top, 0px);
   /* palette (light) */
   --bg: #FBF6E9;            /* bag cream: page ground */
   --surface: #FFFDF8;       /* cards */
@@ -132,10 +133,12 @@
 }
 
 /* ---------- base ---------- */
+.android-webview { --app-safe-top: max(32px, env(safe-area-inset-top, 0px)); }
 *, *::before, *::after { box-sizing: border-box; }
 html { height: 100%; -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
+  padding-top: var(--app-safe-top);
   min-height: 100%;
   background: var(--bg);
   color: var(--text);
@@ -146,6 +149,8 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 img { max-width: 100%; display: block; }
+/* Cover scrolled content behind the system status bar, including sticky headers. */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: var(--app-safe-top); background: var(--bg); z-index: 90; pointer-events: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 a { color: var(--brand); }

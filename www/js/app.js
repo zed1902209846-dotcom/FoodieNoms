@@ -90,6 +90,20 @@ window.FN = window.FN || {};
       <button data-go="profile" aria-label="My profile">${c.avatar(sel.me().name, true)}</button>
     </div></header>`;
   }
+  function studentTabbar() {
+    const cur = FN.route.name;
+    const tabs = [
+      ['home', 'Home', 'home', ['home']],
+      ['tag', 'Deals', 'deals', ['deals', 'vendor', 'food', 'live-food', 'reviews']],
+      ['receipt', 'Orders', 'orders', ['orders', 'order', 'confirmed', 'review']],
+      ['heart', 'Saved', 'saved', ['saved']],
+      ['user', 'Profile', 'profile', ['profile', 'settings', 'impact', 'notifications']]
+    ];
+    return `<nav class="tabbar student-tabbar m-only" aria-label="Student navigation">${tabs.map(([icon, label, path, names]) => {
+      const active = names.includes(cur);
+      return `<button type="button" class="${active ? 'is-on' : ''}" data-go="${path}"${active ? ' aria-current="page"' : ''}><span class="pill">${ic(icon, 'ic-l')}</span>${label}</button>`;
+    }).join('')}</nav>`;
+  }
   function sidenav(v) {
     const cur = FN.route.path; const n = sel.unread(v.id);
     const item = (i, l, g, extra = '') => `<button class="nav-item ${cur && cur.startsWith(g) ? 'is-on' : ''}" data-go="${g}">${ic(i, 'ic-l')}<span class="grow">${l}</span>${extra}</button>`;
@@ -107,13 +121,6 @@ window.FN = window.FN || {};
     return `<nav class="tabbar m-only" aria-label="Vendor navigation">${t('home', 'Home', 'v/home', cur === 'v/home')}${t('list', 'Listings', 'v/listings', cur.startsWith('v/listing'))}${t('receipt', 'Orders', 'v/reservations', cur.startsWith('v/reservations') || cur.startsWith('v/verify'), pending ? `<span class="count">${pending}</span>` : '')}${t('store', 'Store', 'v/store', ['v/store', 'v/reviews', 'v/notifications'].includes(cur))}</nav>`;
   }
 
-  const STUDENT_TABS = ['home', 'deals', 'orders', 'saved', 'profile'];
-  function studentTabbar() {
-    const cur = FN.route.path || '';
-    const t = (i, l, g) => { const on = cur === g; return `<button class="${on ? 'is-on' : ''}" data-go="${g}" aria-current="${on ? 'page' : 'false'}"><span class="pill">${ic(i, 'ic-l')}</span>${l}</button>`; };
-    return `<nav class="tabbar m-only" aria-label="Student navigation">${t('home', 'Home', 'home')}${t('tag', 'Deals', 'deals')}${t('receipt', 'Orders', 'orders')}${t('bookmark', 'Saved', 'saved')}${t('user', 'Profile', 'profile')}</nav>`;
-  }
-
   FN.render = function (keepScroll = false, animate = false, isBack = false) {
     if (!FN.route.fn) return;
     const y = window.scrollY;
@@ -121,7 +128,10 @@ window.FN = window.FN || {};
     if (!view) return;
     const hasBar = /class="actionbar/.test(view.html);
     let html;
-    if (view.shell === 'student') { const tabs = !hasBar && STUDENT_TABS.includes(FN.route.path); html = `<div class="shell student">${topnav()}<main class="screen ${hasBar ? 'has-actionbar' : ''} ${tabs ? 'has-tabbar' : ''}" id="screen">${view.html}</main>${tabs ? studentTabbar() : ''}</div>`; }
+    if (view.shell === 'student') {
+      const tabs = !hasBar && !['basket', 'pay', 'processing', 'failed', 'confirmed'].includes(FN.route.name);
+      html = `<div class="shell student">${topnav()}<main class="screen ${hasBar ? 'has-actionbar' : ''} ${tabs ? 'has-tabbar' : ''}" id="screen">${view.html}</main>${tabs ? studentTabbar() : ''}</div>`;
+    }
     else if (view.shell === 'vendor') { const v = sel.myVendor(); const tabs = !hasBar; html = `<div class="shell vendor">${sidenav(v)}<main class="screen ${hasBar ? 'has-actionbar' : ''} ${tabs ? 'has-tabbar' : ''}" id="screen">${view.html}</main>${tabs ? tabbar(v) : ''}</div>`; }
     else if (view.shell === 'auth') html = `<div class="shell auth-shell">${view.html}</div>`;
     else html = `<div class="shell bare">${view.html}</div>`;

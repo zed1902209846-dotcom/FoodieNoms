@@ -143,11 +143,12 @@ window.FN = window.FN || {};
       const meals = os.filter((reservation) => reservation.status === 'collected').reduce((sum, reservation) => sum + Number(reservation.quantity || 0), 0);
       const ending = live.slice().sort((a, b) => String(a.to || '').localeCompare(String(b.to || '')) || a.left - b.left).slice(0, 3);
       const stat = (i, val, l, count = '') => `<div class="card stat-card">${ic(i, 'ic-m t-brand')}<span class="t-display num" ${count}>${val}</span><span class="t-small t-muted">${l}</span></div>`;
-      return { shell: 'vendor', nav: 'v/home', fab: true, html: `${bar({ brand: true, title: 'Dashboard' })}
+      return { shell: 'vendor', nav: 'v/home', html: `${bar({ brand: true, title: 'Dashboard' })}
       <div class="content">
         <div class="row v-head" style="gap:12px">${c.ph({ cat: v.cat, name: v.name }, { w: 56, h: 56 })}<div class="grow stack-s" style="gap:0"><h1 class="t-h1">${esc(v.name)}</h1>${c.meta('clock', `${time.toMin(v.closes) > time.nowMin ? 'Open' : 'Closed'} · closes ${time.fmt(v.closes)}`)}</div><button class="btn btn-accent d-only" data-go="v/listings/new">${ic('plus', 'ic-m')}List surplus food</button></div>
         <section class="card row accepting ${v.accepting ? 'on' : ''}" style="flex-direction:row;gap:12px"><div class="grow stack-s" style="gap:0"><b>${v.accepting ? 'Accepting reservations' : 'Reservations paused'}</b><span class="t-caption t-muted">${v.accepting ? 'Students can reserve your listings now' : 'Your listings are hidden from students'}</span></div>${c.toggle(v.accepting, 'v-accepting', '', 'Accept reservations')}</section>
         <div class="stat-grid">${stat('bag', live.length, 'Items listed now')}${stat('receipt', os.filter(o => o.status !== 'cancelled').length, 'Reservations today')}${stat('wallet', rm(earned), 'Earned today (test)', `data-count="${earned.toFixed(2)}" data-dec="2" data-pre="RM"`)}${stat('meal', meals, 'Meals rescued today')}</div>
+        <button class="btn btn-accent btn-block m-only" data-go="v/listings/new">${ic('plus', 'ic-m')}List surplus food</button>
         <div class="v-cols">
           <section class="stack">
             <div class="row between"><h2 class="t-h2">Next pickups</h2><button class="btn-link t-small" data-go="v/reservations">View all</button></div>
@@ -159,8 +160,7 @@ window.FN = window.FN || {};
               : !listingState.loaded ? `<div class="card t-muted t-small">Loading listings…</div>` : c.empty({ title: 'List your first surplus food', body: 'Add what’s left near closing time. Students nearby see it straight away.', actions: '<button class="btn btn-accent" data-go="v/listings/new">List surplus food</button>' })}
           </section>
         </div>
-      </div>
-      <button class="btn btn-accent fab m-only" data-go="v/listings/new">${ic('plus', 'ic-m')}List surplus food</button>`, after: r => FN.motion.countUp(r) };
+      </div>`, after: r => FN.motion.countUp(r) };
     },
 
     listings() {
@@ -168,8 +168,9 @@ window.FN = window.FN || {};
       const all = listingState.listings; const tab = U.vListTab;
       const groups = { active: all.filter(l => l.visible && l.left > 0), soldout: all.filter(l => l.left === 0), hidden: all.filter(l => !l.visible && l.left > 0) };
       const list = groups[tab];
-      return { shell: 'vendor', nav: 'v/listings', fab: true, html: `${bar({ title: 'My Listings', right: `<button class="btn btn-accent btn-sm d-only" data-go="v/listings/new">${ic('plus', 'ic-s')}New listing</button>` })}
+      return { shell: 'vendor', nav: 'v/listings', html: `${bar({ title: 'My Listings', right: `<button class="btn btn-accent btn-sm d-only" data-go="v/listings/new">${ic('plus', 'ic-s')}New listing</button>` })}
       <div class="content">
+        <button class="btn btn-accent btn-block m-only" data-go="v/listings/new">${ic('plus', 'ic-m')}New listing</button>
         ${c.seg([['active', `Active (${groups.active.length})`], ['soldout', `Sold out (${groups.soldout.length})`], ['hidden', `Hidden (${groups.hidden.length})`]], tab, 'v-list-tab')}
         ${!listingState.loaded ? `<div class="empty"><span class="ibox round">${ic('clock', 'ic-xl')}</span><h2 class="t-h1">Loading listings</h2><p class="t-muted">Getting your live Firestore listings.</p></div>` : ''}
         ${listingState.error ? c.empty({ art: false, title: 'Could not load listings', body: 'Please log in as a vendor and try again.' }) : ''}
@@ -179,8 +180,7 @@ window.FN = window.FN || {};
           <hr class="divider"><div class="row between"><span class="t-caption t-muted">${l.visible ? 'Visible to students' : 'Hidden'}</span><button class="btn btn-secondary btn-sm" data-go="v/listing/${l.id}">${ic('edit', 'ic-s')}Edit</button></div>
         </article>`).join('')}</div>` : ''}
         ${listingState.loaded && !listingState.error && !list.length ? c.empty({ art: tab === 'active', title: { active: 'Nothing listed right now', soldout: 'Nothing sold out yet', hidden: 'No hidden listings' }[tab], body: tab === 'active' ? 'List food you expect to have left before closing. It goes live for nearby students straight away.' : 'Listings move here automatically.', actions: tab === 'active' ? '<button class="btn btn-accent" data-go="v/listings/new">List surplus food</button>' : '' }) : ''}
-      </div>
-      <button class="add-fab fab m-only" style="width:56px;height:56px;background:var(--accent)" data-go="v/listings/new" aria-label="New listing">${ic('plus', 'ic-l')}</button>` };
+      </div>` };
     },
 
     listingNew() {

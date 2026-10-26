@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  // Android WebViews may report a zero CSS safe inset under the status bar.
+  if ((window.Capacitor && window.Capacitor.getPlatform() === 'android') || /Android.*; wv\)/.test(navigator.userAgent)) {
+    document.documentElement.classList.add('android-webview');
+  }
+</script>
 <title>FoodieNoms</title>
 <meta name="description" content="Reserve discounted surplus food from cafés and bakeries near campus.">
 <meta name="theme-color" content="#2E5A27">
