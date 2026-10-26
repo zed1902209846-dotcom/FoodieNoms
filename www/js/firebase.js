@@ -18,6 +18,8 @@ import {
 
 import {
   getAuth,
+  initializeAuth,
+  indexedDBLocalPersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut
@@ -37,7 +39,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
-export const auth = getAuth(app);
+// In the iOS app, getAuth() never finishes signing in inside WKWebView,
+// so native builds set up Auth with IndexedDB persistence directly.
+export const auth = window.Capacitor?.isNativePlatform?.()
+  ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
+  : getAuth(app);
 
 console.log("Firebase initialization successful:", app.options.projectId);
 
