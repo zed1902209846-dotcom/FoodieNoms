@@ -1,0 +1,17 @@
+{
+  "name": "foodienoms-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FoodieNoms mobile app (Capacitor wrapper for the web app in www/)",
+  "scripts": {
+    "sync": "cap sync",
+    "android": "cap sync android && cap open android",
+    "ios": "cap sync ios && cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  }
+}

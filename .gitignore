@@ -1,0 +1,16 @@
+node_modules/
+.DS_Store
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
+
+# iOS
+ios/App/build/
+ios/DerivedData/
+xcuserdata/

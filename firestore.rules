@@ -1,0 +1,164 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsUser(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isStudent() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "student";
+    }
+
+    function isVendor() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "vendor";
+    }
+
+    match /users/{userId} {
+      allow get: if ownsUser(userId);
+
+      allow create: if ownsUser(userId)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.createdAt == request.time
+        && (
+          (
+            request.resource.data.role == "student"
+            && request.resource.data.keys().hasOnly([
+              "name", "email", "campus", "role", "createdAt"
+            ])
+            && request.resource.data.name is string
+            && request.resource.data.campus is string
+          )
+          ||
+          (
+            request.resource.data.role == "vendor"
+            && request.resource.data.keys().hasOnly([
+              "name", "email", "role", "category", "phone",
+              "address", "campus", "opens", "closes", "createdAt"
+            ])
+            && request.resource.data.name is string
+            && request.resource.data.category is string
+            && request.resource.data.phone is string
+            && request.resource.data.address is string
+            && request.resource.data.campus is string
+            && request.resource.data.opens is string
+            && request.resource.data.closes is string
+          )
+        );
+    }
+
+    match /listings/{listingId} {
+      allow get, list: if resource.data.visible == true
+        || (isVendor() && resource.data.vendorId == request.auth.uid);
+
+      allow create: if isVendor()
+        && request.resource.data.keys().hasOnly([
+          "vendorId", "name", "category", "orig", "price", "left",
+          "from", "to", "description", "visible", "createdAt"
+        ])
+        && request.resource.data.vendorId == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.category is string
+        && request.resource.data.orig is number
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.price < request.resource.data.orig
+        && request.resource.data.left is int
+        && request.resource.data.left > 0
+        && request.resource.data.from is string
+        && request.resource.data.to is string
+        && request.resource.data.description is string
+        && request.resource.data.visible == true
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if isStudent()
+        && request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(["left"])
+        && request.resource.data.left is int
+        && request.resource.data.left >= 0
+        && request.resource.data.left == resource.data.left - 1
+        && !exists(
+          /databases/$(database)/documents/reservations/$(request.auth.uid + "_" + listingId)
+        )
+        && existsAfter(
+          /databases/$(database)/documents/reservations/$(request.auth.uid + "_" + listingId)
+        );
+
+      allow update: if isVendor()
+        && resource.data.vendorId == request.auth.uid
+        && request.resource.data.vendorId == resource.data.vendorId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly([
+            "name", "category", "orig", "price", "left", "from", "to",
+            "description", "visible"
+          ])
+        && request.resource.data.name is string
+        && request.resource.data.category is string
+        && request.resource.data.orig is number
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.price < request.resource.data.orig
+        && request.resource.data.left is int
+        && request.resource.data.left >= 0
+        && request.resource.data.from is string
+        && request.resource.data.to is string
+        && request.resource.data.description is string
+        && request.resource.data.visible is bool;
+    }
+
+    match /reservations/{reservationId} {
+      allow create: if isStudent()
+        && reservationId == request.auth.uid + "_" + request.resource.data.listingId
+        && request.resource.data.keys().hasOnly([
+          "listingId", "vendorId", "studentId", "studentName",
+          "quantity", "unitPrice", "pickupFrom", "pickupTo",
+          "status", "createdAt"
+        ])
+        && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.studentName
+          == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity == 1
+        && request.resource.data.status == "reserved"
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.vendorId
+          == get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.vendorId
+        && request.resource.data.unitPrice
+          == get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.price
+        && request.resource.data.pickupFrom
+          == get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.from
+        && request.resource.data.pickupTo
+          == get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.to
+        && get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.visible == true
+        && get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.left > 0
+        && getAfter(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.left
+          == get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.left - 1;
+
+      allow get: if signedIn()
+        && (
+          reservationId.matches("^" + request.auth.uid + "_.*")
+          || (isVendor() && resource.data.vendorId == request.auth.uid)
+        );
+
+      allow list: if signedIn()
+        && (
+          resource.data.studentId == request.auth.uid
+          || (isVendor() && resource.data.vendorId == request.auth.uid)
+        );
+
+      allow update: if isVendor()
+        && resource.data.vendorId == request.auth.uid
+        && resource.data.status == "reserved"
+        && request.resource.data.status == "collected"
+        && request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(["status"]);
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "appId": "com.foodienoms.app",
+  "appName": "FoodieNoms",
+  "webDir": "www",
+  "backgroundColor": "#FBF6E9",
+  "android": {
+    "backgroundColor": "#FBF6E9"
+  },
+  "ios": {
+    "backgroundColor": "#FBF6E9",
+    "contentInset": "never"
+  }
+}
