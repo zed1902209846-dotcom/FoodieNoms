@@ -69,7 +69,7 @@
 .upload:focus-within { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- splash / launch animation ---------- */
-.splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: var(--bg); cursor: pointer; padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px); }
+.splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: var(--bg); cursor: pointer; padding: var(--app-safe-top) 16px env(safe-area-inset-bottom, 0px); }
 .splash.out { animation: splash-out .38s ease forwards; }
 .logo-stage { position: relative; width: min(240px, 62vw); aspect-ratio: 1; }
 .logo-stage .glow { position: absolute; inset: 6%; border-radius: 50%; background: var(--tint); transform: scale(0); }
@@ -169,8 +169,8 @@
 .food-hero { position: relative; }
 .food-hero .ph { border-radius: 0; }
 .food-hero .ph .ph-ic { width: 72px; max-width: 72px; }
-.fh-back { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); left: max(14px, env(safe-area-inset-left, 0px)); }
-.fh-save { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); }
+.fh-back { position: absolute; top: 14px; left: max(14px, env(safe-area-inset-left, 0px)); }
+.fh-save { position: absolute; top: 14px; right: max(14px, env(safe-area-inset-right, 0px)); }
 .food-body { margin-top: -22px; position: relative; background: var(--bg); border-radius: var(--r-xl) var(--r-xl) 0 0; padding-top: 20px; }
 @media (min-width: 960px) {
   .food-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; padding: 24px; align-items: start; }
@@ -188,7 +188,7 @@
 .ring .arc { stroke: var(--brand); stroke-linecap: round; stroke-dasharray: 339; stroke-dashoffset: 339; animation: ring 1.7s var(--ease-out) forwards; }
 .ring img { position: absolute; inset: 22%; width: 56%; animation: float 1.2s ease-in-out infinite; }
 @keyframes ring { to { stroke-dashoffset: 0; } }
-.confirm { gap: 16px; padding-top: calc(28px + env(safe-area-inset-top, 0px)); }
+.confirm { gap: 16px; padding-top: 28px; }
 .stamp-stage { position: relative; width: 140px; aspect-ratio: 0.9412; }
 .stamp-stage .cm { width: 100%; height: 100%; animation: bag-land .6s var(--ease-bounce) both; }
 .stamp-stage .stamp { position: absolute; left: 66.8%; top: 62.13%; width: 33.2%; height: 31.99%; max-width: none; pointer-events: none; animation: stamp .55s cubic-bezier(.2,.9,.3,1.3) .45s both; }
