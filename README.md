@@ -140,3 +140,17 @@ Repository: [zed1902209846-dotcom/FoodieNoms](https://github.com/zed1902209846-d
 5. Run `npx cap sync android` on the Android development machine or `npx cap sync ios` on the Mac, then rebuild and install.
 
 For interface work, use `www/` as the source of truth rather than the generated native web assets.
+
+## Branches
+
+| Branch | Used on | Purpose |
+| --- | --- | --- |
+| `main` | both | Shared fixes that both apps need (login, data, common layout). |
+| `android` | Windows + Android Studio | Android app work. |
+| `ios` | Mac + Xcode | iOS app work. |
+
+Workflow:
+
+- Platform-only changes: commit on `android` or `ios`.
+- Shared changes: commit on `main`, then merge `main` into `android` and `ios` (GitHub Desktop: switch to the branch → Branch → Merge into current branch → `main`).
+- After switching branch or pulling, run `npx cap sync android` (Windows) or `npx cap sync ios` (Mac).
